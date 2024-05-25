@@ -1,6 +1,13 @@
 import 'package:flutter/foundation.dart' as foundation;
 import 'models.dart' as models;
 
+enum TaskFilter {
+  all,
+  completed,
+  incomplete,
+  favourite,
+}
+
 class TaskProvider with foundation.ChangeNotifier {
   List<models.Category> _categories = [];
   List<models.Task> _tasks = [];
@@ -39,15 +46,18 @@ class TaskProvider with foundation.ChangeNotifier {
     return _tasks.where((task) => task.categoryId == categoryId).toList();
   }
 
-  List<models.Task> filterTasks(String categoryId, String filter) {
+  List<models.Task> filterTasks(String categoryId, TaskFilter filter) {
     var tasks = getTasksByCategory(categoryId);
-    if (filter == 'Completed') {
-      return tasks.where((task) => task.isCompleted).toList();
-    } else if (filter == 'Incomplete') {
-      return tasks.where((task) => !task.isCompleted).toList();
-    } else if (filter == 'Favourite') {
-      return tasks.where((task) => task.isFavourite).toList();
+    switch (filter) {
+      case TaskFilter.completed:
+        return tasks.where((task) => task.isCompleted).toList();
+      case TaskFilter.incomplete:
+        return tasks.where((task) => !task.isCompleted).toList();
+      case TaskFilter.favourite:
+        return tasks.where((task) => task.isFavourite).toList();
+      case TaskFilter.all:
+      default:
+        return tasks;
     }
-    return tasks;
   }
 }

@@ -3,9 +3,9 @@ import 'package:uuid/uuid.dart';
 var uuid = Uuid();
 
 class Category {
-  String id;
+  final String id;
   String name;
-  DateTime createdAt;
+  final DateTime createdAt;
 
   Category({required this.name})
       : id = uuid.v4(),
@@ -13,13 +13,13 @@ class Category {
 }
 
 class Task {
-  String id;
-  String title;
-  String description;
+  final String id;
+  final String title;
+  final String description;
   bool isCompleted;
   bool isFavourite;
-  DateTime createdAt;
-  String categoryId;
+  final DateTime createdAt;
+  final String categoryId;
 
   Task({
     required this.title,
