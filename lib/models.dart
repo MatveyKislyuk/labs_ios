@@ -14,12 +14,13 @@ class Category {
 
 class Task {
   final String id;
-  final String title;
-  final String description;
+  String title;
+  String description;
   bool isCompleted;
   bool isFavourite;
   final DateTime createdAt;
   final String categoryId;
+  List<String> attachedFiles;
 
   Task({
     required this.title,
@@ -27,6 +28,7 @@ class Task {
     required this.categoryId,
     this.isCompleted = false,
     this.isFavourite = false,
+    this.attachedFiles = const [],
   })  : id = uuid.v4(),
         createdAt = DateTime.now();
 }

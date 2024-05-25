@@ -42,6 +42,20 @@ class TaskProvider with foundation.ChangeNotifier {
     notifyListeners();
   }
 
+  void updateTask(models.Task updatedTask) {
+    var index = _tasks.indexWhere((task) => task.id == updatedTask.id);
+    if (index != -1) {
+      _tasks[index] = updatedTask;
+      notifyListeners();
+    }
+  }
+
+  void attachFileToTask(String taskId, String filePath) {
+    var task = _tasks.firstWhere((task) => task.id == taskId);
+    task.attachedFiles.add(filePath);
+    notifyListeners();
+  }
+
   List<models.Task> getTasksByCategory(String categoryId) {
     return _tasks.where((task) => task.categoryId == categoryId).toList();
   }

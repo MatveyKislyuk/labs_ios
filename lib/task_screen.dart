@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'task_provider.dart';
 import 'models.dart' as models;
+import 'task_detail_screen.dart';
 
 class TaskScreen extends StatefulWidget {
   final models.Category category;
@@ -63,36 +64,46 @@ class _TaskScreenState extends State<TaskScreen> {
               itemCount: tasks.length,
               itemBuilder: (context, index) {
                 var task = tasks[index];
-                return Card(
-                  margin: EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
-                  child: ListTile(
-                    title: Text(task.title),
-                    trailing: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        IconButton(
-                          icon: Icon(task.isCompleted ? Icons.check_box : Icons.check_box_outline_blank),
-                          onPressed: () {
-                            setState(() {
-                              task.isCompleted = !task.isCompleted;
-                            });
-                          },
-                        ),
-                        IconButton(
-                          icon: Icon(task.isFavourite ? Icons.star : Icons.star_border, color: task.isFavourite ? Colors.yellow : null),
-                          onPressed: () {
-                            setState(() {
-                              task.isFavourite = !task.isFavourite;
-                            });
-                          },
-                        ),
-                        IconButton(
-                          icon: Icon(Icons.delete),
-                          onPressed: () {
-                            taskProvider.deleteTask(task.id);
-                          },
-                        ),
-                      ],
+                return GestureDetector( // Обертываем ListTile в GestureDetector
+                  onTap: () {
+                    Navigator.push( // Переходим на экран детализации задачи при нажатии
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => TaskDetailScreen(task: task),
+                      ),
+                    );
+                  },
+                  child: Card(
+                    margin: EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+                    child: ListTile(
+                      title: Text(task.title),
+                      trailing: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          IconButton(
+                            icon: Icon(task.isCompleted ? Icons.check_box : Icons.check_box_outline_blank),
+                            onPressed: () {
+                              setState(() {
+                                task.isCompleted = !task.isCompleted;
+                              });
+                            },
+                          ),
+                          IconButton(
+                            icon: Icon(task.isFavourite ? Icons.star : Icons.star_border, color: task.isFavourite ? Colors.yellow : null),
+                            onPressed: () {
+                              setState(() {
+                                task.isFavourite = !task.isFavourite;
+                              });
+                            },
+                          ),
+                          IconButton(
+                            icon: Icon(Icons.delete),
+                            onPressed: () {
+                              taskProvider.deleteTask(task.id);
+                            },
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 );
