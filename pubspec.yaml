@@ -1,4 +1,4 @@
-name: task_manager
+name: labs_ios
 description: "labs_ios"
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
@@ -30,10 +30,10 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  provider: ^6.0.0
-  uuid: ^3.0.4
-  file_picker: ^5.0.1
-  shared_preferences: ^2.0.0
+  get_it: ^7.2.0
+  flutter_bloc: ^8.0.1
+  equatable: ^2.0.3
+  uuid: ^3.0.6
 
 
 
@@ -45,6 +45,8 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  injectable_generator: ^1.5.2
+  build_runner: ^2.1.7
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is
