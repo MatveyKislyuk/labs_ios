@@ -11,8 +11,8 @@ import 'package:labs_ios/domain/usecases/get_categories.dart';
 import 'package:labs_ios/domain/usecases/get_tasks.dart';
 import 'package:labs_ios/domain/usecases/update_category.dart';
 import 'package:labs_ios/domain/usecases/update_task.dart';
-import 'package:labs_ios/presentation/blocs/category_bloc.dart';
-import 'package:labs_ios/presentation/blocs/task_bloc.dart';
+import 'package:labs_ios/presentation/cubits/category_cubit.dart';
+import 'package:labs_ios/presentation/cubits/task_cubit.dart';
 
 final sl = GetIt.instance;
 
@@ -32,14 +32,14 @@ void init() {
   sl.registerLazySingleton(() => UpdateCategory(sl()));
 
   // Blocs
-  sl.registerFactory(() => CategoryBloc(
+  sl.registerFactory(() => CategoryCubit(
     getCategories: sl(),
     addCategory: sl(),
     deleteCategory: sl(),
     updateCategory: sl(),
   ));
 
-  sl.registerFactory(() => TaskBloc(
+  sl.registerFactory(() => TaskCubit(
     getTasks: sl(),
     addTask: sl(),
     updateTask: sl(),

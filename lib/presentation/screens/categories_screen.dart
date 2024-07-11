@@ -1,15 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:labs_ios/presentation/blocs/category_bloc.dart';
+import 'package:labs_ios/presentation/cubits/category_cubit.dart';
 import 'package:labs_ios/presentation/widgets/category_card.dart';
 import 'package:labs_ios/domain/entities/category.dart';
 import 'package:uuid/uuid.dart';
-
-import '../blocs/category_event.dart';
-import '../blocs/category_state.dart';
+import 'package:labs_ios/presentation/cubits/category_event.dart';
+import 'package:labs_ios/presentation/cubits/category_state.dart';
 
 class CategoriesScreen extends StatelessWidget {
-  const CategoriesScreen({Key? key}) : super(key: key);
+  const CategoriesScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -33,11 +32,11 @@ class CategoriesScreen extends StatelessWidget {
         ),
         centerTitle: true,
       ),
-      body: BlocBuilder<CategoryBloc, CategoryState>(
+      body: BlocBuilder<CategoryCubit, CategoryState>(
         builder: (context, state) {
-          if (state is CategoryLoading) {
+          if (state.status == CategoryStatus.loading) {
             return const Center(child: CircularProgressIndicator());
-          } else if (state is CategoryLoaded) {
+          } else if (state.status == CategoryStatus.loaded) {
             return state.categories.isNotEmpty
                 ? ListView.builder(
               itemCount: state.categories.length,
@@ -46,7 +45,7 @@ class CategoriesScreen extends StatelessWidget {
                 return CategoryCard(
                   category: category,
                   onDismissed: () {
-                    context.read<CategoryBloc>().add(DeleteCategoryEvent(category.id));
+                    context.read<CategoryCubit>().deleteCategoryById(category.id);
                   },
                   onEdit: (newName) {
                     final updatedCategory = Category(
@@ -54,13 +53,13 @@ class CategoriesScreen extends StatelessWidget {
                       name: newName,
                       createdAt: category.createdAt,
                     );
-                    context.read<CategoryBloc>().add(UpdateCategoryEvent(updatedCategory));
+                    context.read<CategoryCubit>().modifyCategory(updatedCategory);
                   },
                 );
               },
             )
                 : const Center(child: Text('Список категорий пуст'));
-          } else if (state is CategoryError) {
+          } else if (state.status == CategoryStatus.error) {
             return Center(child: Text(state.message));
           } else {
             return const Center(child: Text('Неизвестная ошибка'));
@@ -101,7 +100,7 @@ class CategoriesScreen extends StatelessWidget {
                     name: name,
                     createdAt: DateTime.now(),
                   );
-                  context.read<CategoryBloc>().add(AddNewCategory(newCategory));
+                  context.read<CategoryCubit>().addNewCategory(newCategory);
                 }
                 Navigator.pop(context);
               },
