@@ -5,7 +5,7 @@ abstract class TaskState extends Equatable {
   const TaskState();
 
   @override
-  List<Object> get props => [];
+  List<Object?> get props => [];
 }
 
 class TaskInitial extends TaskState {}
@@ -14,11 +14,12 @@ class TaskLoading extends TaskState {}
 
 class TaskLoaded extends TaskState {
   final List<Task> tasks;
+  final TaskFilter currentFilter;
 
-  const TaskLoaded(this.tasks);
+  const TaskLoaded(this.tasks, {required this.currentFilter});
 
   @override
-  List<Object> get props => [tasks];
+  List<Object> get props => [tasks, currentFilter];
 }
 
 class TaskError extends TaskState {
@@ -30,3 +31,10 @@ class TaskError extends TaskState {
   List<Object> get props => [message];
 }
 
+
+enum TaskFilter {
+  All,
+  Completed,
+  Uncompleted,
+  Favorites,
+}

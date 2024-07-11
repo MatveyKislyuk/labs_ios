@@ -1,17 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:labs_ios/domain/entities/task.dart';
+import 'package:labs_ios/presentation/cubits/task_cubit.dart';
 
 class TaskDetailScreen extends StatefulWidget {
   final Task task;
   final Function(Task) onUpdate;
   final Function(Task) onDelete;
+  final TaskCubit taskCubit;
 
   const TaskDetailScreen({
-    super.key,
+    Key? key,
     required this.task,
     required this.onUpdate,
     required this.onDelete,
-  });
+    required this.taskCubit,
+  }) : super(key: key);
 
   @override
   _TaskDetailScreenState createState() => _TaskDetailScreenState();
@@ -98,9 +101,11 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
                     padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
                   ),
                   onPressed: () {
-                    widget.task.update(
-                      title: _titleController.text,
-                      description: _descriptionController.text,
+                    widget.taskCubit.modifyTask(
+                      widget.task.copyWith(
+                        title: _titleController.text,
+                        description: _descriptionController.text,
+                      ),
                     );
                     widget.onUpdate(widget.task);
                     Navigator.pop(context);

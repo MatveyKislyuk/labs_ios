@@ -4,7 +4,6 @@ import 'package:labs_ios/presentation/cubits/category_cubit.dart';
 import 'package:labs_ios/presentation/widgets/category_card.dart';
 import 'package:labs_ios/domain/entities/category.dart';
 import 'package:uuid/uuid.dart';
-import 'package:labs_ios/presentation/cubits/category_event.dart';
 import 'package:labs_ios/presentation/cubits/category_state.dart';
 
 class CategoriesScreen extends StatelessWidget {

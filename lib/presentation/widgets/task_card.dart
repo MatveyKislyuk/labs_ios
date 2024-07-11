@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:labs_ios/domain/entities/task.dart';
+import 'package:labs_ios/presentation/cubits/task_cubit.dart';
 import 'package:labs_ios/presentation/screens/task_detail_screen.dart';
 
 class TaskCard extends StatelessWidget {
   final Task task;
-
+  final TaskCubit taskCubit;
   final VoidCallback onDelete;
   final VoidCallback onToggleFavorite;
   final VoidCallback onToggleCompletion;
@@ -13,6 +14,7 @@ class TaskCard extends StatelessWidget {
   const TaskCard({
     Key? key,
     required this.task,
+    required this.taskCubit,
     required this.onDelete,
     required this.onToggleFavorite,
     required this.onToggleCompletion,
@@ -54,10 +56,11 @@ class TaskCard extends StatelessWidget {
               builder: (context) => TaskDetailScreen(
                 task: task,
                 onUpdate: onUpdate,
-                onDelete: (task) {
+                onDelete: (deletedTask) {
                   onDelete();
                   Navigator.pop(context);
                 },
+                taskCubit: taskCubit,
               ),
             ),
           );
@@ -73,7 +76,10 @@ class TaskCard extends StatelessWidget {
             children: [
               Checkbox(
                 value: task.isCompleted,
-                onChanged: (newValue) => onToggleCompletion(),
+                onChanged: (newValue) {
+                  onToggleCompletion();
+                  taskCubit.modifyTask(task.copyWith(isCompleted: !task.isCompleted));
+                },
               ),
               Text(task.title),
               IconButton(
@@ -81,7 +87,10 @@ class TaskCard extends StatelessWidget {
                   task.isFavourite ? Icons.star : Icons.star_outline,
                   color: task.isFavourite ? Colors.yellow : Colors.grey,
                 ),
-                onPressed: onToggleFavorite,
+                onPressed: () {
+                  onToggleFavorite();
+                  taskCubit.modifyTask(task.copyWith(isFavourite: !task.isFavourite));
+                },
               ),
             ],
           ),
