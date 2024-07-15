@@ -35,6 +35,10 @@ dependencies:
   equatable: ^2.0.3
   uuid: ^3.0.6
   dartz: ^0.10.0-nullsafety.3
+  drift: ^2.0.0
+  path_provider: ^2.0.0
+  sqflite: ^2.0.0
+  sqlite3_flutter_libs: ^0.5.0
 
 
 
@@ -48,6 +52,7 @@ dev_dependencies:
     sdk: flutter
   injectable_generator: ^1.5.2
   build_runner: ^2.1.7
+  drift_dev: ^2.0.0
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is

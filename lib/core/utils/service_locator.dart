@@ -9,19 +9,28 @@ import 'package:labs_ios/domain/usecases/delete_category.dart';
 import 'package:labs_ios/domain/usecases/delete_task.dart';
 import 'package:labs_ios/domain/usecases/get_categories.dart';
 import 'package:labs_ios/domain/usecases/get_tasks.dart';
+import 'package:labs_ios/data/datasources/category_local_data_source.dart';
+import 'package:labs_ios/data/datasources/task_local_data_source.dart';
 import 'package:labs_ios/domain/usecases/update_category.dart';
 import 'package:labs_ios/domain/usecases/update_task.dart';
 import 'package:labs_ios/presentation/cubits/category_cubit.dart';
 import 'package:labs_ios/presentation/cubits/task_cubit.dart';
+import 'package:labs_ios/data/database/database.dart';
 
 final sl = GetIt.instance;
 
 void init() {
-  // Repositories
-  sl.registerLazySingleton<CategoryRepository>(() => CategoryRepositoryImpl());
-  sl.registerLazySingleton<TaskRepository>(() => TaskRepositoryImpl());
+  sl.registerLazySingleton<AppDatabase>(() => AppDatabase());
 
-  // UseCases
+
+  sl.registerLazySingleton<CategoryLocalDataSource>(() => CategoryLocalDataSource(sl()));
+  sl.registerLazySingleton<TaskLocalDataSource>(() => TaskLocalDataSource(sl()));
+
+
+  sl.registerLazySingleton<CategoryRepository>(() => CategoryRepositoryImpl(sl()));
+  sl.registerLazySingleton<TaskRepository>(() => TaskRepositoryImpl(sl()));
+
+
   sl.registerLazySingleton(() => AddCategory(sl()));
   sl.registerLazySingleton(() => AddTask(sl()));
   sl.registerLazySingleton(() => DeleteCategory(sl()));
