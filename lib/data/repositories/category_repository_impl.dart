@@ -1,9 +1,7 @@
-import 'package:drift/drift.dart';
-import 'package:labs_ios/data/database/database.dart' as db;
 import 'package:labs_ios/domain/entities/category.dart';
 import 'package:labs_ios/domain/repositories/category_repository.dart';
 import 'package:labs_ios/data/datasources/category_local_data_source.dart';
-
+import 'package:labs_ios/data/mappers/category_mapper.dart';
 
 class CategoryRepositoryImpl implements CategoryRepository {
   final CategoryLocalDataSource localDataSource;
@@ -13,19 +11,12 @@ class CategoryRepositoryImpl implements CategoryRepository {
   @override
   Future<List<Category>> getCategories() async {
     final categories = await localDataSource.getAllCategories();
-    return categories.map((e) => Category(
-      id: e.id,
-      name: e.name,
-      createdAt: e.createdAt,
-    )).toList();
+    return categories.map((category) => CategoryMapper.fromDb(category)).toList();
   }
+
   @override
   Future<void> addCategory(Category category) async {
-    final categoryCompanion = db.CategoriesCompanion(
-      id: Value(category.id),
-      name: Value(category.name),
-      createdAt: Value(category.createdAt),
-    );
+    final categoryCompanion = CategoryMapper.toDb(category);
     await localDataSource.insertCategory(categoryCompanion);
   }
 
@@ -36,11 +27,7 @@ class CategoryRepositoryImpl implements CategoryRepository {
 
   @override
   Future<void> updateCategory(Category category) async {
-    final categoryCompanion = db.CategoriesCompanion(
-      id: Value(category.id),
-      name: Value(category.name),
-      createdAt: Value(category.createdAt),
-    );
+    final categoryCompanion = CategoryMapper.toDb(category);
     await localDataSource.updateCategory(categoryCompanion);
   }
 }

@@ -1,9 +1,7 @@
-import 'package:drift/drift.dart';
-import 'package:labs_ios/data/database/database.dart' as db;
 import 'package:labs_ios/domain/entities/task.dart';
 import 'package:labs_ios/domain/repositories/task_repository.dart';
 import 'package:labs_ios/data/datasources/task_local_data_source.dart';
-
+import 'package:labs_ios/data/mappers/task_mapper.dart';
 
 class TaskRepositoryImpl implements TaskRepository {
   final TaskLocalDataSource localDataSource;
@@ -13,27 +11,12 @@ class TaskRepositoryImpl implements TaskRepository {
   @override
   Future<List<Task>> getTasks(String categoryId) async {
     final tasks = await localDataSource.getTasksByCategoryId(categoryId);
-    return tasks.map((e) => Task(
-      id: e.id,
-      title: e.title,
-      description: e.description,
-      isCompleted: e.isCompleted,
-      isFavourite: e.isFavourite,
-      categoryId: e.categoryId,
-      createdAt: e.createdAt,
-    )).toList();
+    return tasks.map((task) => TaskMapper.fromDb(task)).toList();
   }
+
   @override
   Future<void> addTask(Task task) async {
-    final taskCompanion = db.TasksCompanion(
-      id: Value(task.id),
-      title: Value(task.title),
-      description: Value(task.description),
-      isCompleted: Value(task.isCompleted),
-      isFavourite: Value(task.isFavourite),
-      categoryId: Value(task.categoryId),
-      createdAt: Value(task.createdAt),
-    );
+    final taskCompanion = TaskMapper.toDb(task);
     await localDataSource.insertTask(taskCompanion);
   }
 
@@ -44,15 +27,7 @@ class TaskRepositoryImpl implements TaskRepository {
 
   @override
   Future<void> updateTask(Task task) async {
-    final taskCompanion = db.TasksCompanion(
-      id: Value(task.id),
-      title: Value(task.title),
-      description: Value(task.description),
-      isCompleted: Value(task.isCompleted),
-      isFavourite: Value(task.isFavourite),
-      categoryId: Value(task.categoryId),
-      createdAt: Value(task.createdAt),
-    );
+    final taskCompanion = TaskMapper.toDb(task);
     await localDataSource.updateTask(taskCompanion);
   }
 }
