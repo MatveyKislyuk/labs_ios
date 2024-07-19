@@ -1,29 +1,33 @@
 import 'package:labs_ios/domain/entities/category.dart';
 import 'package:labs_ios/domain/repositories/category_repository.dart';
+import 'package:labs_ios/data/datasources/category_local_data_source.dart';
+import 'package:labs_ios/data/mappers/category_mapper.dart';
 
 class CategoryRepositoryImpl implements CategoryRepository {
-  final List<Category> _categories = [];
+  final CategoryLocalDataSource localDataSource;
+
+  CategoryRepositoryImpl(this.localDataSource);
 
   @override
   Future<List<Category>> getCategories() async {
-    return _categories;
+    final categories = await localDataSource.getAllCategories();
+    return categories.map((category) => CategoryMapper.fromDb(category)).toList();
   }
 
   @override
   Future<void> addCategory(Category category) async {
-    _categories.add(category);
+    final categoryCompanion = CategoryMapper.toDb(category);
+    await localDataSource.insertCategory(categoryCompanion);
   }
 
   @override
   Future<void> deleteCategory(String id) async {
-    _categories.removeWhere((category) => category.id == id);
+    await localDataSource.deleteCategory(id);
   }
 
   @override
   Future<void> updateCategory(Category category) async {
-    final index = _categories.indexWhere((c) => c.id == category.id);
-    if (index != -1) {
-      _categories[index] = category;
-    }
+    final categoryCompanion = CategoryMapper.toDb(category);
+    await localDataSource.updateCategory(categoryCompanion);
   }
 }
