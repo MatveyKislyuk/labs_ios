@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:labs_ios/domain/entities/task.dart';
 import 'package:labs_ios/presentation/cubits/task_cubit.dart';
+import 'package:labs_ios/data/services/flickr_service.dart';
 
 class TaskDetailScreen extends StatefulWidget {
   final Task task;
@@ -23,12 +24,17 @@ class TaskDetailScreen extends StatefulWidget {
 class _TaskDetailScreenState extends State<TaskDetailScreen> {
   late TextEditingController _titleController;
   late TextEditingController _descriptionController;
+  late FlickrService _flickrService;
+  List<String> _images = [];
+  int _page = 1;
 
   @override
   void initState() {
     super.initState();
     _titleController = TextEditingController(text: widget.task.title);
     _descriptionController = TextEditingController(text: widget.task.description);
+    _flickrService = FlickrService();
+    _fetchImages();
   }
 
   @override
@@ -36,6 +42,13 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
     _titleController.dispose();
     _descriptionController.dispose();
     super.dispose();
+  }
+
+  void _fetchImages() async {
+    final images = await _flickrService.fetchImages('nature', _page);
+    setState(() {
+      _images.addAll(images);
+    });
   }
 
   @override
@@ -96,6 +109,18 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
                   ),
                 ),
                 const SizedBox(height: 16),
+                if (widget.task.imageUrl != null) ...[
+                  Image.network(widget.task.imageUrl!),
+                  IconButton(
+                    icon: const Icon(Icons.delete),
+                    onPressed: () {
+                      setState(() {
+                        widget.task.imageUrl = null;
+                      });
+                    },
+                  ),
+                ],
+                const SizedBox(height: 16),
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
@@ -123,6 +148,30 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
                     Navigator.pop(context);
                   },
                   child: const Text('Удалить'),
+                ),
+                const SizedBox(height: 16),
+                GridView.builder(
+                  shrinkWrap: true,
+                  physics: NeverScrollableScrollPhysics(),
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    childAspectRatio: 1,
+                  ),
+                  itemCount: _images.length,
+                  itemBuilder: (context, index) {
+                    return GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          widget.task.imageUrl = _images[index];
+                        });
+                      },
+                      child: Image.network(_images[index]),
+                    );
+                  },
+                ),
+                TextButton(
+                  onPressed: _fetchImages,
+                  child: const Text('Загрузить ещё'),
                 ),
               ],
             ),

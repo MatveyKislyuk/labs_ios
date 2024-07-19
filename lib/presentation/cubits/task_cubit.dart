@@ -68,8 +68,8 @@ class TaskCubit extends Cubit<TaskState> {
     result.fold(
           (failure) => emit(TaskError(failure.toString())),
           (_) async {
-        final Either<Failure, List<task_entity.Task>> result = await getTasks(task.categoryId);
-        result.fold(
+            final Either<Failure, List<task_entity.Task>> updatedTasks = await getTasks(task.categoryId);
+            updatedTasks.fold(
               (failure) => emit(TaskError(failure.toString())),
               (tasks) => emit(TaskLoaded(tasks, currentFilter: TaskFilter.All)),
         );
