@@ -7,6 +7,7 @@ import 'package:labs_ios/domain/usecases/delete_task.dart';
 import 'package:labs_ios/domain/usecases/get_tasks.dart';
 import 'package:labs_ios/domain/usecases/update_task.dart';
 import 'package:labs_ios/core/error/failures.dart';
+import 'package:labs_ios/data/services/flickr_service.dart';
 import 'task_state.dart';
 
 class TaskCubit extends Cubit<TaskState> {
@@ -14,6 +15,9 @@ class TaskCubit extends Cubit<TaskState> {
   late TextEditingController _descriptionController;
 
   TaskFilter currentFilter = TaskFilter.All;
+  late FlickrService _flickrService;
+  List<String> _images = [];
+  int _page = 1;
 
   final GetTasks getTasks;
   final AddTask addTask;
@@ -26,18 +30,31 @@ class TaskCubit extends Cubit<TaskState> {
     required this.updateTask,
     required this.deleteTask,
   }) : super(TaskInitial()) {
-    initState();
-  }
-
-  void initState() {
     _titleController = TextEditingController();
     _descriptionController = TextEditingController();
+    _flickrService = FlickrService();
   }
 
-  void dispose() {
+  @override
+  Future<void> close() {
+    _titleController.dispose();
+    _descriptionController.dispose();
+    return super.close();
+  }
+
+  void initState(task_entity.Task task) {
+    _titleController.text = task.title;
+    _descriptionController.text = task.description ?? '';  // Обрабатываем null значение
+    fetchImages('nature');
+  }
+
+  void disposeControllers() {
     _titleController.dispose();
     _descriptionController.dispose();
   }
+
+  TextEditingController get titleController => _titleController;
+  TextEditingController get descriptionController => _descriptionController;
 
   void loadTasks(String categoryId) async {
     emit(TaskLoading());
@@ -68,8 +85,8 @@ class TaskCubit extends Cubit<TaskState> {
     result.fold(
           (failure) => emit(TaskError(failure.toString())),
           (_) async {
-            final Either<Failure, List<task_entity.Task>> updatedTasks = await getTasks(task.categoryId);
-            updatedTasks.fold(
+        final Either<Failure, List<task_entity.Task>> updatedTasks = await getTasks(task.categoryId);
+        updatedTasks.fold(
               (failure) => emit(TaskError(failure.toString())),
               (tasks) => emit(TaskLoaded(tasks, currentFilter: TaskFilter.All)),
         );
@@ -115,6 +132,36 @@ class TaskCubit extends Cubit<TaskState> {
     emit(TaskLoaded(filteredTasks, currentFilter: currentFilter));
   }
 
-  TextEditingController get titleController => _titleController;
-  TextEditingController get descriptionController => _descriptionController;
+  void fetchImages(String query) async {
+    try {
+      final images = await _flickrService.fetchImages(query, _page);
+      _images = images;
+      emit(TaskImagesLoaded(images));
+    } catch (e) {
+      emit(TaskError(e.toString()));
+    }
+  }
+
+  void fetchMoreImages(String query) async {
+    _page++;
+    try {
+      final images = await _flickrService.fetchImages(query, _page);
+      _images.addAll(images);
+      emit(TaskImagesLoaded(_images));
+    } catch (e) {
+      emit(TaskError(e.toString()));
+    }
+  }
+
+  void selectImage(String? imageUrl) {
+    if (imageUrl != null) {
+      emit(TaskDetailLoaded(
+        (state as TaskDetailLoaded).task.copyWith(imageUrl: imageUrl),
+        _images,
+      ));
+    }
+  }
+
+  TextEditingController getTitleController() => _titleController;
+  TextEditingController getDescriptionController() => _descriptionController;
 }

@@ -25,7 +25,7 @@ class TaskMapper {
       isFavourite: Value(task.isFavourite),
       categoryId: Value(task.categoryId),
       createdAt: Value(task.createdAt),
-      imageUrl: Value(task.imageUrl),
+      imageUrl: task.imageUrl != null ? Value(task.imageUrl!) : const Value.absent(),
     );
   }
 }

@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';  // Убедись, что этот импорт есть
 import 'package:labs_ios/domain/entities/task.dart';
 import 'package:labs_ios/presentation/cubits/task_cubit.dart';
-import 'package:labs_ios/data/services/flickr_service.dart';
+import 'package:labs_ios/presentation/cubits/task_state.dart';  // Добавь этот импорт
 
 class TaskDetailScreen extends StatefulWidget {
   final Task task;
@@ -24,32 +25,7 @@ class TaskDetailScreen extends StatefulWidget {
 class _TaskDetailScreenState extends State<TaskDetailScreen> {
   late TextEditingController _titleController;
   late TextEditingController _descriptionController;
-  late FlickrService _flickrService;
-  List<String> _images = [];
-  int _page = 1;
 
-  @override
-  void initState() {
-    super.initState();
-    _titleController = TextEditingController(text: widget.task.title);
-    _descriptionController = TextEditingController(text: widget.task.description);
-    _flickrService = FlickrService();
-    _fetchImages();
-  }
-
-  @override
-  void dispose() {
-    _titleController.dispose();
-    _descriptionController.dispose();
-    super.dispose();
-  }
-
-  void _fetchImages() async {
-    final images = await _flickrService.fetchImages('nature', _page);
-    setState(() {
-      _images.addAll(images);
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -114,6 +90,7 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
                   IconButton(
                     icon: const Icon(Icons.delete),
                     onPressed: () {
+                      widget.taskCubit.selectImage('');  // Устанавливаем изображение как пустую строку
                       setState(() {
                         widget.task.imageUrl = null;
                       });
@@ -150,28 +127,40 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
                   child: const Text('Удалить'),
                 ),
                 const SizedBox(height: 16),
-                GridView.builder(
-                  shrinkWrap: true,
-                  physics: NeverScrollableScrollPhysics(),
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    childAspectRatio: 1,
-                  ),
-                  itemCount: _images.length,
-                  itemBuilder: (context, index) {
-                    return GestureDetector(
-                      onTap: () {
-                        setState(() {
-                          widget.task.imageUrl = _images[index];
-                        });
-                      },
-                      child: Image.network(_images[index]),
-                    );
+                BlocBuilder<TaskCubit, TaskState>(
+                  bloc: widget.taskCubit,
+                  builder: (context, state) {
+                    if (state is TaskImagesLoaded) {
+                      return Column(
+                        children: [
+                          GridView.builder(
+                            shrinkWrap: true,
+                            physics: NeverScrollableScrollPhysics(),
+                            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 2,
+                              childAspectRatio: 1,
+                            ),
+                            itemCount: state.images.length,
+                            itemBuilder: (context, index) {
+                              return GestureDetector(
+                                onTap: () {
+                                  widget.taskCubit.selectImage(state.images[index]);
+                                },
+                                child: Image.network(state.images[index]),
+                              );
+                            },
+                          ),
+                          TextButton(
+                            onPressed: () {
+                              widget.taskCubit.fetchMoreImages('nature');
+                            },
+                            child: const Text('Загрузить ещё'),
+                          ),
+                        ],
+                      );
+                    }
+                    return Center(child: Text('Нет изображений'));
                   },
-                ),
-                TextButton(
-                  onPressed: _fetchImages,
-                  child: const Text('Загрузить ещё'),
                 ),
               ],
             ),
