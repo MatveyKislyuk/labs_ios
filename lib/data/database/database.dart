@@ -25,6 +25,7 @@ class Tasks extends Table {
   BoolColumn get isFavourite => boolean().withDefault(Constant(false))();
   TextColumn get categoryId => text()();
   DateTimeColumn get createdAt => dateTime()();
+  TextColumn get imageUrl => text().nullable()();
 
   @override
   Set<Column> get primaryKey => {id};
@@ -35,7 +36,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
 
   Future<List<Category>> getAllCategories() => select(categories).get();
   Future<void> insertCategory(CategoriesCompanion category) => into(categories).insert(category);
@@ -52,7 +53,7 @@ class AppDatabase extends _$AppDatabase {
 LazyDatabase _openConnection() {
   return LazyDatabase(() async {
     final dbFolder = await getApplicationDocumentsDirectory();
-    final file = File(p.join(dbFolder.path, 'db.sqlite'));
+    final file = File(p.join(dbFolder.path, 'db4.sqlite'));
     return NativeDatabase(file);
   });
 }

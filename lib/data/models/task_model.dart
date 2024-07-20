@@ -8,6 +8,7 @@ class TaskModel extends Task {
     bool isCompleted = false,
     bool isFavourite = false,
     required String categoryId,
+    String? imageUrl,
   }) : super(
     id: const Uuid().v4(),
     title: title,
@@ -16,5 +17,6 @@ class TaskModel extends Task {
     isFavourite: isFavourite,
     categoryId: categoryId,
     createdAt: DateTime.now(),
+    imageUrl: imageUrl,
   );
 }

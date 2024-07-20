@@ -31,6 +31,25 @@ class TaskError extends TaskState {
   List<Object> get props => [message];
 }
 
+class TaskDetailLoaded extends TaskState {
+  final Task task;
+  final List<String> images;
+
+  const TaskDetailLoaded(this.task, this.images);
+
+  @override
+  List<Object> get props => [task, images];
+}
+
+class TaskImagesLoaded extends TaskState {
+  final List<String> images;
+  final int page;
+
+  const TaskImagesLoaded(this.images, this.page);
+
+  @override
+  List<Object> get props => [images, page];
+}
 
 enum TaskFilter {
   All,

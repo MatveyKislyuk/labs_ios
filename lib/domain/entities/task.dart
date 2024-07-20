@@ -6,6 +6,7 @@ class Task {
   bool isFavourite;
   final String categoryId;
   final DateTime createdAt;
+  String? imageUrl;
 
   Task({
     required this.id,
@@ -15,6 +16,7 @@ class Task {
     required this.isFavourite,
     required this.categoryId,
     required this.createdAt,
+    this.imageUrl,
   });
 
   Task copyWith({
@@ -25,6 +27,7 @@ class Task {
     bool? isFavourite,
     String? categoryId,
     DateTime? createdAt,
+    String? imageUrl,
   }) {
     return Task(
       id: id ?? this.id,
@@ -34,11 +37,13 @@ class Task {
       isFavourite: isFavourite ?? this.isFavourite,
       categoryId: categoryId ?? this.categoryId,
       createdAt: createdAt ?? this.createdAt,
+      imageUrl: imageUrl ?? this.imageUrl,
     );
   }
 
-  void update({required String title, String? description}) {
+  void update({required String title, String? description, String? imageUrl,}) {
     this.title = title;
     this.description = description;
+    this.imageUrl = imageUrl ?? this.imageUrl;
   }
 }

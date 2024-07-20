@@ -7,6 +7,7 @@ import 'package:labs_ios/domain/usecases/delete_task.dart';
 import 'package:labs_ios/domain/usecases/get_tasks.dart';
 import 'package:labs_ios/domain/usecases/update_task.dart';
 import 'package:labs_ios/core/error/failures.dart';
+import 'package:labs_ios/data/datasources/flickr_service.dart';
 import 'task_state.dart';
 
 class TaskCubit extends Cubit<TaskState> {
@@ -26,18 +27,30 @@ class TaskCubit extends Cubit<TaskState> {
     required this.updateTask,
     required this.deleteTask,
   }) : super(TaskInitial()) {
-    initState();
-  }
-
-  void initState() {
     _titleController = TextEditingController();
     _descriptionController = TextEditingController();
   }
 
-  void dispose() {
+  @override
+  Future<void> close() {
+    _titleController.dispose();
+    _descriptionController.dispose();
+    return super.close();
+  }
+
+  void initState(task_entity.Task task) {
+    _titleController.text = task.title;
+    _descriptionController.text = task.description ?? '';
+    fetchImages('nature');
+  }
+
+  void disposeControllers() {
     _titleController.dispose();
     _descriptionController.dispose();
   }
+
+  TextEditingController get titleController => _titleController;
+  TextEditingController get descriptionController => _descriptionController;
 
   void loadTasks(String categoryId) async {
     emit(TaskLoading());
@@ -68,8 +81,8 @@ class TaskCubit extends Cubit<TaskState> {
     result.fold(
           (failure) => emit(TaskError(failure.toString())),
           (_) async {
-        final Either<Failure, List<task_entity.Task>> result = await getTasks(task.categoryId);
-        result.fold(
+        final Either<Failure, List<task_entity.Task>> updatedTasks = await getTasks(task.categoryId);
+        updatedTasks.fold(
               (failure) => emit(TaskError(failure.toString())),
               (tasks) => emit(TaskLoaded(tasks, currentFilter: TaskFilter.All)),
         );
@@ -115,6 +128,41 @@ class TaskCubit extends Cubit<TaskState> {
     emit(TaskLoaded(filteredTasks, currentFilter: currentFilter));
   }
 
-  TextEditingController get titleController => _titleController;
-  TextEditingController get descriptionController => _descriptionController;
+  void fetchImages(String query) async {
+    try {
+      final flickrService = FlickrService();
+      final images = await flickrService.fetchImages(query, 1);
+      emit(TaskImagesLoaded(images, 1));
+    } catch (e) {
+      emit(TaskError(e.toString()));
+    }
+  }
+
+  void fetchMoreImages(String query) async {
+    if (state is TaskImagesLoaded) {
+      final currentState = state as TaskImagesLoaded;
+      final newPage = currentState.page + 1;
+
+      try {
+        final flickrService = FlickrService();
+        final images = await flickrService.fetchImages(query, newPage);
+        final allImages = [...currentState.images, ...images];
+        emit(TaskImagesLoaded(allImages, newPage));
+      } catch (e) {
+        emit(TaskError(e.toString()));
+      }
+    }
+  }
+
+  void selectImage(String? imageUrl) {
+    if (imageUrl != null && state is TaskDetailLoaded) {
+      emit(TaskDetailLoaded(
+        (state as TaskDetailLoaded).task.copyWith(imageUrl: imageUrl),
+        (state as TaskDetailLoaded).images,
+      ));
+    }
+  }
+
+  TextEditingController getTitleController() => _titleController;
+  TextEditingController getDescriptionController() => _descriptionController;
 }
