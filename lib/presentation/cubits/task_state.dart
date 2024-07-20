@@ -43,11 +43,12 @@ class TaskDetailLoaded extends TaskState {
 
 class TaskImagesLoaded extends TaskState {
   final List<String> images;
+  final int page;
 
-  const TaskImagesLoaded(this.images);
+  const TaskImagesLoaded(this.images, this.page);
 
   @override
-  List<Object> get props => [images];
+  List<Object> get props => [images, page];
 }
 
 enum TaskFilter {

@@ -7,7 +7,7 @@ import 'package:labs_ios/domain/usecases/delete_task.dart';
 import 'package:labs_ios/domain/usecases/get_tasks.dart';
 import 'package:labs_ios/domain/usecases/update_task.dart';
 import 'package:labs_ios/core/error/failures.dart';
-import 'package:labs_ios/data/services/flickr_service.dart';
+import 'package:labs_ios/data/datasources/flickr_service.dart';
 import 'task_state.dart';
 
 class TaskCubit extends Cubit<TaskState> {
@@ -15,9 +15,6 @@ class TaskCubit extends Cubit<TaskState> {
   late TextEditingController _descriptionController;
 
   TaskFilter currentFilter = TaskFilter.All;
-  late FlickrService _flickrService;
-  List<String> _images = [];
-  int _page = 1;
 
   final GetTasks getTasks;
   final AddTask addTask;
@@ -32,7 +29,6 @@ class TaskCubit extends Cubit<TaskState> {
   }) : super(TaskInitial()) {
     _titleController = TextEditingController();
     _descriptionController = TextEditingController();
-    _flickrService = FlickrService();
   }
 
   @override
@@ -44,7 +40,7 @@ class TaskCubit extends Cubit<TaskState> {
 
   void initState(task_entity.Task task) {
     _titleController.text = task.title;
-    _descriptionController.text = task.description ?? '';  // Обрабатываем null значение
+    _descriptionController.text = task.description ?? '';
     fetchImages('nature');
   }
 
@@ -134,30 +130,35 @@ class TaskCubit extends Cubit<TaskState> {
 
   void fetchImages(String query) async {
     try {
-      final images = await _flickrService.fetchImages(query, _page);
-      _images = images;
-      emit(TaskImagesLoaded(images));
+      final flickrService = FlickrService();
+      final images = await flickrService.fetchImages(query, 1);
+      emit(TaskImagesLoaded(images, 1));
     } catch (e) {
       emit(TaskError(e.toString()));
     }
   }
 
   void fetchMoreImages(String query) async {
-    _page++;
-    try {
-      final images = await _flickrService.fetchImages(query, _page);
-      _images.addAll(images);
-      emit(TaskImagesLoaded(_images));
-    } catch (e) {
-      emit(TaskError(e.toString()));
+    if (state is TaskImagesLoaded) {
+      final currentState = state as TaskImagesLoaded;
+      final newPage = currentState.page + 1;
+
+      try {
+        final flickrService = FlickrService();
+        final images = await flickrService.fetchImages(query, newPage);
+        final allImages = [...currentState.images, ...images];
+        emit(TaskImagesLoaded(allImages, newPage));
+      } catch (e) {
+        emit(TaskError(e.toString()));
+      }
     }
   }
 
   void selectImage(String? imageUrl) {
-    if (imageUrl != null) {
+    if (imageUrl != null && state is TaskDetailLoaded) {
       emit(TaskDetailLoaded(
         (state as TaskDetailLoaded).task.copyWith(imageUrl: imageUrl),
-        _images,
+        (state as TaskDetailLoaded).images,
       ));
     }
   }
